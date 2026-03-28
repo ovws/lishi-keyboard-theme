@@ -4,8 +4,9 @@
 李氏三拼3x5a键盘主题处理工具
 功能：
 1. 删除所有字体文件和字体配置
-2. 统一所有布局的字体大小为标准值
-3. 打包为 .hskin 格式
+2. 只调整英文(alphabetic)和数字(numeric)布局的字体大小
+3. 中文(pinyin)、符号(symbolic)、表情(emoji)等保持原样
+4. 打包为 .hskin 格式
 """
 import zipfile
 import os
@@ -14,43 +15,49 @@ import re
 
 # 配置
 KEYBOARD_ZIP = "/projects/.openclaw/media/inbound/E6_9D_8E_E6_B0_8F_E4_B8_89_E6_8B_BC3x5a_E9_94_AE_E7_9B_98_09---bd922eb2-15d6-479a-855e-bc4833c837dd.zip"
-OUTPUT_FILE = "/root/.openclaw/李氏三拼3x5a键盘_统一字体版.hskin"
-TEMP_DIR = "/tmp/keyboard_unified"
+OUTPUT_FILE = "/root/.openclaw/李氏三拼3x5a键盘_优化版.hskin"
+TEMP_DIR = "/tmp/keyboard_optimized"
 
-# 统一字体大小配置（单位：em）
-UNIFIED_SIZES = {
-    '编码字体大小': 1.0,      # 原 0.8125em
-    '横排序号字体大小': 1.0,   # 原 1.125em
-    '横排文字字体大小': 1.0,   # 原 1.125em
-    '横排注释字体大小': 0.75,  # 原 0.75em
-    '展开序号字体大小': 1.0,   # 原 1.0625em
-    '展开文字字体大小': 1.0,   # 原 1.0625em
-    '展开注释字体大小': 0.7,   # 原 0.6875em
-}
+# 字体大小调整系数（只用于英文和数字）
+ALPHABETIC_SCALE = 1.2   # 英文放大 20%
+NUMERIC_SCALE = 1.2      # 数字放大 20%
 
-def unify_fontsize(content):
-    """统一所有 fontSize 为 1em"""
+def adjust_fontsize(content, scale):
+    """调整 fontSize 值"""
     def replace_size(match):
-        # 保持注释相关的字体小一些
-        return "fontSize: 1em"
+        size_str = match.group(1)
+        try:
+            if 'em' in size_str:
+                value = float(size_str.replace('em', ''))
+                new_value = round(value * scale, 4)
+                return f"fontSize: {new_value}em"
+            else:
+                value = float(size_str)
+                new_value = round(value * scale, 4)
+                return f"fontSize: {new_value}em"
+        except:
+            return match.group(0)
     
     pattern = r'fontSize:\s*([\d.]+(?:em)?)'
     return re.sub(pattern, replace_size, content)
 
-def unify_anchor_fontsize(content):
-    """统一锚点定义的字体大小"""
+def adjust_anchor_fontsize(content, scale):
+    """调整锚点定义的字体大小"""
     def replace_anchor(match):
-        full_match = match.group(0)
         anchor_label = match.group(1)
         anchor_name = match.group(2)
-        
-        # 根据配置设置统一大小
-        if anchor_label in UNIFIED_SIZES:
-            size = UNIFIED_SIZES[anchor_label]
-            return f"{anchor_label}: &{anchor_name} {size}em"
-        
-        # 默认使用 1em
-        return f"{anchor_label}: &{anchor_name} 1em"
+        size_str = match.group(3)
+        try:
+            if 'em' in size_str:
+                value = float(size_str.replace('em', ''))
+                new_value = round(value * scale, 4)
+                return f"{anchor_label}: &{anchor_name} {new_value}em"
+            else:
+                value = float(size_str)
+                new_value = round(value * scale, 4)
+                return f"{anchor_label}: &{anchor_name} {new_value}em"
+        except:
+            return match.group(0)
     
     pattern = r'([\u4e00-\u9fa5]+字体大小):\s*&(\w+)\s+([\d.]+(?:em)?)'
     return re.sub(pattern, replace_anchor, content)
@@ -114,9 +121,11 @@ def process_keyboard():
         clean_font_config(config_path)
         print("   ✓ 已删除所有字体配置")
     
-    # 统一字体大小
-    print("\n4. 统一所有布局字体大小...")
-    processed_count = 0
+    # 只调整英文和数字的字体大小
+    print("\n4. 调整英文和数字布局字体大小...")
+    alphabetic_count = 0
+    numeric_count = 0
+    skipped_count = 0
     
     for root, dirs, files in os.walk(theme_dir):
         for file in files:
@@ -126,24 +135,40 @@ def process_keyboard():
             file_path = os.path.join(root, file)
             relative_path = os.path.relpath(file_path, theme_dir)
             
+            # 只处理英文和数字布局
+            is_alphabetic = 'alphabetic' in file.lower()
+            is_numeric = 'numeric' in file.lower()
+            
+            if not (is_alphabetic or is_numeric):
+                skipped_count += 1
+                continue
+            
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
                     content = f.read()
                 
-                # 统一字体大小
-                new_content = unify_fontsize(content)
-                new_content = unify_anchor_fontsize(new_content)
+                if is_alphabetic:
+                    # 英文字体放大
+                    new_content = adjust_fontsize(content, ALPHABETIC_SCALE)
+                    new_content = adjust_anchor_fontsize(new_content, ALPHABETIC_SCALE)
+                    alphabetic_count += 1
+                    print(f"   ✓ [英文放大120%] {relative_path}")
+                elif is_numeric:
+                    # 数字字体放大
+                    new_content = adjust_fontsize(content, NUMERIC_SCALE)
+                    new_content = adjust_anchor_fontsize(new_content, NUMERIC_SCALE)
+                    numeric_count += 1
+                    print(f"   ✓ [数字放大120%] {relative_path}")
                 
-                if new_content != content:
-                    with open(file_path, 'w', encoding='utf-8') as f:
-                        f.write(new_content)
-                    processed_count += 1
-                    print(f"   ✓ {relative_path}")
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(new_content)
             
             except Exception as e:
                 print(f"   ✗ 处理失败 {relative_path}: {e}")
     
-    print(f"\n   共处理 {processed_count} 个布局文件")
+    print(f"\n   调整 {alphabetic_count} 个英文布局文件")
+    print(f"   调整 {numeric_count} 个数字布局文件")
+    print(f"   保持 {skipped_count} 个其他布局文件不变（中文、符号、表情等）")
     
     # 验证
     print("\n5. 验证配置...")
@@ -176,7 +201,9 @@ def process_keyboard():
     print("=" * 60)
     print("\n特性:")
     print("  • 删除所有字体文件和字体配置")
-    print("  • 统一所有布局字体大小（英文、中文、数字）")
+    print("  • 英文布局字体放大 120%（避免字母太小）")
+    print("  • 数字布局字体放大 120%（避免数字太小）")
+    print("  • 中文、符号、表情等保持原始大小（避免重叠）")
     print("  • 使用系统默认字体")
     print("  • 文件格式: .hskin")
     
