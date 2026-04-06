@@ -189,3 +189,58 @@ python3 build_tx02.py
 - 需要中英文混排的场景
 - 追求现代感英文 + 传统中文的设计
 
+
+### 更多字体变体（展示优化）
+
+针对展示场景优化的窄体版本，英文字符宽度更紧凑：
+
+#### 1. HYHuaGuan_65W_TX02_MediumSemiCondensed.ttf ⭐推荐
+
+📦 [下载字体](https://github.com/ovws/lishi-keyboard-theme/raw/main/fonts/HYHuaGuan_65W_TX02_MediumSemiCondensed.ttf) (14MB)
+
+**特点：**
+- 英文字重：Medium（500，比Regular稍粗）
+- 英文宽度：SemiCondensed（94%，比标准窄6%）
+- **最佳平衡**：字重适中 + 宽度适中
+
+#### 2. HYHuaGuan_65W_TX02_SemiCondensed.ttf
+
+📦 [下载字体](https://github.com/ovws/lishi-keyboard-theme/raw/main/fonts/HYHuaGuan_65W_TX02_SemiCondensed.ttf) (14MB)
+
+**特点：**
+- 英文字重：Regular（400，标准）
+- 英文宽度：SemiCondensed（94%）
+- **轻盈紧凑**：适合需要更多空间的展示场景
+
+#### 3. HYHuaGuan_65W_TX02_Condensed.ttf
+
+📦 [下载字体](https://github.com/ovws/lishi-keyboard-theme/raw/main/fonts/HYHuaGuan_65W_TX02_Condensed.ttf) (14MB)
+
+**特点：**
+- 英文字重：Regular（400）
+- 英文宽度：Condensed（88%，比标准窄12%）
+- **超紧凑**：最大程度节省横向空间
+
+---
+
+### 字体对比表
+
+| 字体名称 | 英文字重 | 英文宽度 | 相对宽度 | 推荐场景 |
+|---------|---------|---------|---------|---------|
+| Mixed (Regular) | 400 | 600 | 100% | 通用场景 |
+| **MediumSemiCondensed** ⭐ | **500** | **563** | **94%** | **展示推荐** |
+| SemiCondensed | 400 | 563 | 94% | 轻盈展示 |
+| Condensed | 400 | 525 | 88% | 超紧凑展示 |
+
+**如何选择：**
+- 觉得字母"有点宽" → **MediumSemiCondensed** 或 **SemiCondensed**
+- 需要非常紧凑 → **Condensed**
+- 常规使用 → **Mixed (Regular)**
+
+**所有字体共同特点：**
+- 中文字符：汉仪华冠 65W（等宽，1000单位）
+- 英文字符：TX-02 系列（等宽，根据变体不同）
+- 总字形数：9,980 个
+- 已优化字符：283 个英文/拉丁字符
+- 生成日期：2026-04-06
+
