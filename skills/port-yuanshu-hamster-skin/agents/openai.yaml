@@ -1,0 +1,4 @@
+interface:
+  display_name: "元书转仓皮肤"
+  short_description: "转换 cskin 为兼容仓与新版 iOS 的 hskin"
+  default_prompt: "Use $port-yuanshu-hamster-skin to convert a YuanShu cskin into a validated Hamster hskin with custom fonts."
